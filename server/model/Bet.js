@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const betSchema = new Schema({
+
   betAmount: {
     type: Number,
     required: true,
@@ -13,15 +14,12 @@ const betSchema = new Schema({
   },
   payout: {
     type: Number,
-    required: true,
   },
   win: {
-    type: Bool,
-    required: true,
+    type: Boolean,
   },
   status: {
     type: String,
-    required: true,
   },
 });
 

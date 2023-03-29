@@ -1,13 +1,15 @@
 import {
   BrowserRouter,
-  BrowserRouter as Router,
   Route,
   Routes,
 } from "react-router-dom";
+
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
+import UserLogin from "./components/UserLogin"
+import CryptoBetter from "./components/CryptoBetter";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ function App() {
           <div className="pages">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/userlogin" element={<UserLogin />} />
+              <Route path="/cryptobetter" element={<CryptoBetter />} />
             </Routes>
           </div>
         </BrowserRouter>

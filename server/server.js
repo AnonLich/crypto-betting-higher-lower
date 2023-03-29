@@ -1,10 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const router = require("./routes/user-routes");
+const userRouter = require("./routes/user-routes");
+const betRouter = require("./routes/bet-routes");
+
 const app = express();
 
 app.use(express.json());
-app.use("/users", router);
+app.use("/users", userRouter);
+app.use("/bets", betRouter);
 
 mongoose
   .connect("mongodb+srv://admin:A5ZkdIWoP0yKlfx0@cluster0.csu7sgp.mongodb.net/?retryWrites=true&w=majority")
