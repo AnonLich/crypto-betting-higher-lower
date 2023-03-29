@@ -8,7 +8,8 @@ const UserLogin = (props) => {
   //fetchusers nedanför är därför inte använt än
 
   const fetchUsers = async () => {
-    const res = await fetch("/users");
+    const res = await fetch('http://localhost:9000/users', { mode: 'no-cors' });
+    ;
     const json = await res.json();
     return json.users;
   };

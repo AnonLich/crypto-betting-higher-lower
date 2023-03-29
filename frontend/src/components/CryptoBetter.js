@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import { useMutation } from "react-query";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const CryptoBetter = () => {
   //FETCH
@@ -27,11 +28,15 @@ const CryptoBetter = () => {
   }, []);
 
   const fetchBet = async () => {
-    const res = await fetch("/bets");
+    const res = await fetch("http://localhost:9000/bets/");
     const json = await res.json();
     return json.bets;
   };
-  const { data: betData, error: betError, isLoading: betIsLoading } = useQuery("bets", fetchBet);
+  const {
+    data: betData,
+    error: betError,
+    isLoading: betIsLoading,
+  } = useQuery("bets", fetchBet);
 
   //SETTERS
   const [betAmount, setBetAmount] = useState(0);
@@ -42,16 +47,14 @@ const CryptoBetter = () => {
 
   //MUTATION
   const mutation = useMutation((bet) =>
-    fetch("./bets/", {
-      method: "POST",
+    axios.post("http://localhost:9000/bets", bet, {
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bet),
     })
   );
 
   //ERROR HANDLING
-  if (error) return <div>Request Failed</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Request Failsdded</div>;
+  if (isLoading) return <div>Loadisdsng...</div>;
 
   const calculatePayout = () => {
     if (win) {

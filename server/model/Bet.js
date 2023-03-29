@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const betSchema = new Schema({
-
   betAmount: {
     type: Number,
     required: true,

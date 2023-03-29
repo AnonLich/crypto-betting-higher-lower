@@ -6,7 +6,7 @@ import CryptoBetter from "../components/CryptoBetter";
 
 const Home = () => {
   const fetchUsers = async () => {
-    const res = await fetch("/users");
+    const res = await fetch("http://localhost:9000/users");
     const json = await res.json();
     return json.users;
   };
