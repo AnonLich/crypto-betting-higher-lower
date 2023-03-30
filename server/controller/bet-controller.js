@@ -92,6 +92,7 @@ const getBetById = async (req, res, next) => {
   try {
     bet = await Bet.findById(id)
 
+    
   } catch (err) {
     return next(err);
   }

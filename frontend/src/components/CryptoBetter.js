@@ -14,12 +14,15 @@ const CryptoBetter = (props) => {
   };
   const { data, error, isLoading } = useQuery("usd", fetchCrypto);
   const [price, setPrice] = useState(0);
+  const [lastPrice, setLastPrice] = useState(0);
 
   useEffect(() => {
     const updatePrice = async () => {
       const result = await fetchCrypto();
       setPrice(result.USD);
     };
+
+    setLastPrice(price);
 
     const interval = setInterval(updatePrice, 5000);
 
@@ -56,7 +59,15 @@ const CryptoBetter = (props) => {
   if (error) return <div>Request Failsdded</div>;
   if (isLoading) return <div>Loadisdsng...</div>;
 
-
+  const calculateWin = () => {
+    if (lastPrice > price && (higherOrLower = "higher")) {
+      setWin(true);
+      return <div>Win!</div>;
+    } else {
+      setWin(false);
+      return <div>Lose!</div>;
+    }
+  };
 
   const calculatePayout = () => {
     if (win) {
@@ -66,10 +77,9 @@ const CryptoBetter = (props) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setUser(props);
-    console.log(props);
     const bet = {
       betAmount,
       betType,
@@ -79,8 +89,13 @@ const CryptoBetter = (props) => {
       higherOrLower,
       user,
     };
+    const { data } = await mutation.mutateAsync(bet);
+    const updatedUser = {
+      //bets blir assignad en array som skapas med spread operatorn, om user.bets finns så blir den existerande user.bets arrayn spreadad till den nya arrayn, och även det nya data objekten, annars skapas en nya array med endast data objektet
+      bets: user.bets ? [...user.bets, data] : [data],
+    };
+    setUser(updatedUser);
     console.log(bet);
-    mutation.mutate(bet);
   };
 
   return (

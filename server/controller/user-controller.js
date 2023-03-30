@@ -83,12 +83,9 @@ const getUserById = async (req, res, next) => {
   let user;
 
   try {
-    user = await User.findById(id)
-      .populate("bets")
-
-      .exec();
+    user = await User.findById(id).populate("bets").exec(err, bets);
   } catch (err) {
-    return next(err);
+    return next(bets);
   }
   if (!user) {
     return res.status(404).json({ message: "Did not find user" });
