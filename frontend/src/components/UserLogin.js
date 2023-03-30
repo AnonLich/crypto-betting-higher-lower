@@ -1,6 +1,8 @@
 import { useMutation } from "react-query";
 import { useState } from "react";
 import { useQuery } from "react-query";
+import axios from "axios";
+
 
 const UserLogin = (props) => {
   //To-Do  - Loginscreen,
@@ -8,10 +10,8 @@ const UserLogin = (props) => {
   //fetchusers nedanför är därför inte använt än
 
   const fetchUsers = async () => {
-    const res = await fetch('http://localhost:9000/users', { mode: 'no-cors' });
-    ;
-    const json = await res.json();
-    return json.users;
+    const res = await axios.get("http://localhost:9000/users");
+    return res.data.users;
   };
 
   const { data, error, isLoading } = useQuery("users", fetchUsers);
@@ -39,7 +39,7 @@ const UserLogin = (props) => {
     if (foundUser) {
       console.log("Logged in!");
       setLoggedIn(true);
-      props.onSubmit(loggedIn);
+      props.onSubmit(foundUser);
     } else console.log("Wrong credentials");
   };
 
@@ -68,7 +68,10 @@ const UserLogin = (props) => {
         </div>
       ) : (
         <div className="stats">
-          <div>Hello {foundUser.name}, your current balance is: {foundUser.balance}.</div>
+          <div>
+            Hello {foundUser.name}, your current balance is: {foundUser.balance}
+            .
+          </div>
         </div>
       )}
     </>

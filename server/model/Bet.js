@@ -20,6 +20,14 @@ const betSchema = new Schema({
   status: {
     type: String,
   },
+  higherOrLower: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 module.exports = mongoose.model("Bet", betSchema);

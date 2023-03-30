@@ -3,15 +3,14 @@ import { useMutation } from "react-query";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const CryptoBetter = () => {
+const CryptoBetter = (props) => {
   //FETCH
   const fetchCrypto = async () => {
-    const res = await fetch(
+    const res = await axios.get(
       "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD"
     );
 
-    const json = await res.json();
-    return json; //Hämtar USD objektet mot BTC från API
+    return res.data; //Hämtar USD objektet mot BTC från API
   };
   const { data, error, isLoading } = useQuery("usd", fetchCrypto);
   const [price, setPrice] = useState(0);
@@ -28,9 +27,8 @@ const CryptoBetter = () => {
   }, []);
 
   const fetchBet = async () => {
-    const res = await fetch("http://localhost:9000/bets/");
-    const json = await res.json();
-    return json.bets;
+    const res = await axios.get("http://localhost:9000/bets/");
+    return res.data.bets;
   };
   const {
     data: betData,
@@ -42,8 +40,10 @@ const CryptoBetter = () => {
   const [betAmount, setBetAmount] = useState(0);
   const [betType, setBetType] = useState("BTCUSD");
   const [payout, setPayout] = useState(0);
-  const [win, setWin] = useState("");
+  const [win, setWin] = useState();
   const [status, setStatus] = useState("");
+  const [higherOrLower, setHigherOrLower] = useState("");
+  const [user, setUser] = useState("");
 
   //MUTATION
   const mutation = useMutation((bet) =>
@@ -56,6 +56,8 @@ const CryptoBetter = () => {
   if (error) return <div>Request Failsdded</div>;
   if (isLoading) return <div>Loadisdsng...</div>;
 
+
+
   const calculatePayout = () => {
     if (win) {
       setPayout(betAmount * 2);
@@ -66,7 +68,18 @@ const CryptoBetter = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const bet = { betAmount, betType, payout, win, status };
+    setUser(props);
+    console.log(props);
+    const bet = {
+      betAmount,
+      betType,
+      payout,
+      win,
+      status,
+      higherOrLower,
+      user,
+    };
+    console.log(bet);
     mutation.mutate(bet);
   };
 
@@ -89,7 +102,20 @@ const CryptoBetter = () => {
             <option value="BTCUSD">BTCUSD</option>
             <option value="ETHUSD">ETHUSD</option>
           </select>
-          <button disabled={mutation.isLoading}>Add bet</button>
+          <button
+            disabled={mutation.isLoading}
+            value="higher"
+            onClick={(e) => setHigherOrLower(e.target.value)}
+          >
+            Higher
+          </button>
+          <button
+            disabled={mutation.isLoading}
+            value="lower"
+            onClick={(e) => setHigherOrLower(e.target.value)}
+          >
+            Lower
+          </button>
         </form>
         {mutation.isError && (
           <div>There was an error: {mutation.error.message}</div>

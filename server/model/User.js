@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 
-const MyObjectId = mongoose.Types.ObjectId;
-
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -18,9 +16,12 @@ const userSchema = new Schema({
     type: Number,
     required: true,
   },
-  bet: {
-    type: [MyObjectId]
-  }
+  bets: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Bet",
+    },
+  ],
 });
 
 module.exports = mongoose.model("User", userSchema);

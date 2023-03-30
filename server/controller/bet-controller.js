@@ -15,7 +15,7 @@ const getAllBets = async (req, res, next) => {
 };
 
 const addBet = async (req, res, next) => {
-  const { betAmount, betType, payout, win, status } = req.body;
+  const { betAmount, betType, payout, win, status, higherOrLower } = req.body;
   if (!betType && betType.trim() == "" && !betAmount && betAmount.length > 1) {
     return res.status(422).json({ message: "Invalid Data " });
   }
@@ -29,6 +29,7 @@ const addBet = async (req, res, next) => {
       payout,
       win,
       status,
+      higherOrLower,
     });
     bet = await bet.save();
   } catch (err) {
@@ -42,7 +43,7 @@ const addBet = async (req, res, next) => {
 
 const updateBet = async (req, res, next) => {
   const id = req.params.id;
-  const { betAmount, betType, payout, win, status } = req.body;
+  const { betAmount, betType, payout, win, status, higherOrLower } = req.body;
   if (!betType && betType.trim() == "" && !betAmount && betAmount.length > 1) {
     return res.status(422).json({ message: "Invalid Data " });
   }
@@ -50,7 +51,14 @@ const updateBet = async (req, res, next) => {
   let bet;
 
   try {
-    bet = await Bet.findByIdAndUpdate(id, { betAmount, betType, payout, win, status });
+    bet = await Bet.findByIdAndUpdate(id, {
+      betAmount,
+      betType,
+      payout,
+      win,
+      status,
+      higherOrLower,
+    });
   } catch (err) {
     return next(err);
   }
@@ -82,7 +90,8 @@ const getBetById = async (req, res, next) => {
   let bet;
 
   try {
-    bet = await Bet.findById(id);
+    bet = await Bet.findById(id)
+
   } catch (err) {
     return next(err);
   }

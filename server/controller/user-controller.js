@@ -15,7 +15,7 @@ const getAllUsers = async (req, res, next) => {
 };
 
 const addUser = async (req, res, next) => {
-  const { name, password, balance } = req.body;
+  const { name, password, balance, bets } = req.body;
   if (!name && name.trim() == "" && !password && password.length > 6) {
     return res.status(422).json({ message: "Invalid Data " });
   }
@@ -27,6 +27,7 @@ const addUser = async (req, res, next) => {
       name,
       password,
       balance,
+      bets,
     });
     user = await user.save();
   } catch (err) {
@@ -40,7 +41,7 @@ const addUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   const id = req.params.id;
-  const { name, password, balance } = req.body;
+  const { name, password, balance, bets } = req.body;
   if (!name && name.trim() == "" && !password && password.length > 6) {
     return res.status(422).json({ message: "Invalid Data " });
   }
@@ -48,7 +49,9 @@ const updateUser = async (req, res, next) => {
   let user;
 
   try {
-    user = await User.findByIdAndUpdate(id, { name, password, balance });
+    user = await User.findByIdAndUpdate(id, { name, password, balance, bets })
+      .populate("bets")
+      .exec();
   } catch (err) {
     return next(err);
   }
@@ -80,7 +83,10 @@ const getUserById = async (req, res, next) => {
   let user;
 
   try {
-    user = await User.findById(id);
+    user = await User.findById(id)
+      .populate("bets")
+
+      .exec();
   } catch (err) {
     return next(err);
   }
