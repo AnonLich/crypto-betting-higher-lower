@@ -13,21 +13,70 @@ const CryptoBetter = (props) => {
     return res.data; //Hämtar USD objektet mot BTC från API
   };
   const { data, error, isLoading } = useQuery("usd", fetchCrypto);
-  const [price, setPrice] = useState(0);
   const [lastPrice, setLastPrice] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [betAmount, setBetAmount] = useState(0);
+  const [betType, setBetType] = useState("BTCUSD");
+  const [payout, setPayout] = useState(0);
+  const [win, setWin] = useState();
+  const [status, setStatus] = useState(false); //ongoing bet
+  const [higherOrLower, setHigherOrLower] = useState("");
+  const [user, setUser] = useState("");
+
+  const checkWin = (lastPrice, price) => {
+    while (status) {
+      if (
+        (lastPrice < price && higherOrLower === "higher") ||
+        (lastPrice > price && higherOrLower === "lower")
+      ) {
+        setStatus(false);
+        return true;
+      } else {
+        setStatus(false);
+        return false;
+      }
+    }
+  };
+
+  useEffect(() => {
+    calculatePayout(win);
+  }, [win]);
+
+  const calculatePayout = (win) => {
+    if (win) {
+      setPayout(betAmount * 2);
+    } else {
+      setPayout(betAmount / 2);
+    }
+  };
+
+  useEffect(() => {
+    if (lastPrice !== 0) {
+      setWin(checkWin(lastPrice, price));
+    }
+  }, [lastPrice, price]);
 
   useEffect(() => {
     const updatePrice = async () => {
       const result = await fetchCrypto();
+      setLastPrice(price);
       setPrice(result.USD);
     };
-
-    setLastPrice(price);
 
     const interval = setInterval(updatePrice, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [price]);
+
+  function WinLose({ win }) {
+    if (win && status) {
+      return <div>Win!</div>;
+    } else if (!win && status) {
+      return <div>Lose!</div>;
+    } else {
+      return <div>No current bet.</div>;
+    }
+  }
 
   const fetchBet = async () => {
     const res = await axios.get("http://localhost:9000/bets/");
@@ -38,15 +87,6 @@ const CryptoBetter = (props) => {
     error: betError,
     isLoading: betIsLoading,
   } = useQuery("bets", fetchBet);
-
-  //SETTERS
-  const [betAmount, setBetAmount] = useState(0);
-  const [betType, setBetType] = useState("BTCUSD");
-  const [payout, setPayout] = useState(0);
-  const [win, setWin] = useState();
-  const [status, setStatus] = useState("");
-  const [higherOrLower, setHigherOrLower] = useState("");
-  const [user, setUser] = useState("");
 
   //MUTATION
   const mutation = useMutation((bet) =>
@@ -59,27 +99,10 @@ const CryptoBetter = (props) => {
   if (error) return <div>Request Failsdded</div>;
   if (isLoading) return <div>Loadisdsng...</div>;
 
-  const calculateWin = () => {
-    if (lastPrice > price && (higherOrLower = "higher")) {
-      setWin(true);
-      return <div>Win!</div>;
-    } else {
-      setWin(false);
-      return <div>Lose!</div>;
-    }
-  };
-
-  const calculatePayout = () => {
-    if (win) {
-      setPayout(betAmount * 2);
-    } else {
-      setPayout(betAmount / 2);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUser(props);
+    setStatus(true);
     const bet = {
       betAmount,
       betType,
@@ -90,12 +113,22 @@ const CryptoBetter = (props) => {
       user,
     };
     const { data } = await mutation.mutateAsync(bet);
+    let betsArray = [];
+
+    if (user.bets) {
+      betsArray = [...user.bets, data];
+    } else {
+      betsArray = [data];
+    }
+
     const updatedUser = {
-      //bets blir assignad en array som skapas med spread operatorn, om user.bets finns så blir den existerande user.bets arrayn spreadad till den nya arrayn, och även det nya data objekten, annars skapas en nya array med endast data objektet
-      bets: user.bets ? [...user.bets, data] : [data],
+      bets: betsArray,
     };
+
     setUser(updatedUser);
     console.log(bet);
+    console.log("price: " + price);
+    console.log("lastprice: " + lastPrice);
   };
 
   return (
@@ -137,6 +170,7 @@ const CryptoBetter = (props) => {
         )}
         {mutation.isSuccess && <div>New bet added</div>}
       </div>
+      <WinLose win={win} />
     </div>
   );
 };

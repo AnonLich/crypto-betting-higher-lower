@@ -18,7 +18,7 @@ const betSchema = new Schema({
     type: Boolean,
   },
   status: {
-    type: String,
+    type: Boolean,
   },
   higherOrLower: {
     type: String,
