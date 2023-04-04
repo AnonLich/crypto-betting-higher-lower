@@ -1,8 +1,7 @@
 import { useMutation } from "react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import axios from "axios";
-
 
 const UserLogin = (props) => {
   //To-Do  - Loginscreen,
@@ -21,6 +20,17 @@ const UserLogin = (props) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [foundUser, setFoundUser] = useState(null);
   const [balance, setBalance] = useState(0);
+  const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    if (foundUser) {
+      // check if foundUser is not null
+      setBalance(foundUser.balance);
+      console.log("FOUND");
+      console.log(foundUser);
+    }
+  }, [foundUser, balance]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,6 +49,7 @@ const UserLogin = (props) => {
     if (foundUser) {
       console.log("Logged in!");
       setLoggedIn(true);
+      setUserId(foundUser._id);
       props.onSubmit(foundUser);
     } else console.log("Wrong credentials");
   };
@@ -69,8 +80,7 @@ const UserLogin = (props) => {
       ) : (
         <div className="stats">
           <div>
-            Hello {foundUser.name}, your current balance is: {foundUser.balance}
-            .
+            Hello {foundUser.name}, your current balance is: {balance}.
           </div>
         </div>
       )}

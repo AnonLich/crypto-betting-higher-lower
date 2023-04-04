@@ -83,7 +83,7 @@ const getUserById = async (req, res, next) => {
   let user;
 
   try {
-    user = await User.findById(id).populate("bets").exec(err, bets);
+    user = await User.findById(id).populate("bets");
   } catch (err) {
     return next(bets);
   }

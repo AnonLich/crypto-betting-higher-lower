@@ -21,7 +21,13 @@ const CryptoBetter = (props) => {
   const [win, setWin] = useState();
   const [status, setStatus] = useState(false); //ongoing bet
   const [higherOrLower, setHigherOrLower] = useState("");
-  const [user, setUser] = useState("");
+  const [balance, setBalance] = useState();
+  const [user, setUser] = useState({
+    name: "",
+    password: "",
+    balance: 0,
+    bets: [],
+  });
 
   const checkWin = (lastPrice, price) => {
     while (status) {
@@ -62,12 +68,25 @@ const CryptoBetter = (props) => {
       setLastPrice(price);
       setPrice(result.USD);
     };
-
     const interval = setInterval(updatePrice, 5000);
 
     return () => clearInterval(interval);
   }, [price]);
 
+  useEffect(() => {
+    setUser(props.CryptoBetter);
+  }, [props]);
+
+  useEffect(() => {
+    setBalance(user.balance + payout);
+  });
+
+  /*
+  const calculateBalance = (payout) => {
+    return (user.balance + payout);
+  }
+};
+*/
   function WinLose({ win }) {
     if (win && status) {
       return <div>Win!</div>;
@@ -78,16 +97,6 @@ const CryptoBetter = (props) => {
     }
   }
 
-  const fetchBet = async () => {
-    const res = await axios.get("http://localhost:9000/bets/");
-    return res.data.bets;
-  };
-  const {
-    data: betData,
-    error: betError,
-    isLoading: betIsLoading,
-  } = useQuery("bets", fetchBet);
-
   //MUTATION
   const mutation = useMutation((bet) =>
     axios.post("http://localhost:9000/bets", bet, {
@@ -95,13 +104,29 @@ const CryptoBetter = (props) => {
     })
   );
 
+  const updateUserBalance = useMutation((newBalance) =>
+    axios.put(`http://localhost:9000/users/${user._id}`, {
+      balance: newBalance,
+      name: user.name,
+      password: user.password,
+    })
+  );
+
+  /*
+  const fetchUsers = async () => {
+    const res = await axios.get(`http://localhost:9000/users/${user._id}`);
+    return res.data;
+  };
+
+  const { data: userData, error: userError, isLoading: userIsLoading } = useQuery("users", fetchUsers);
+*/
+
   //ERROR HANDLING
   if (error) return <div>Request Failsdded</div>;
   if (isLoading) return <div>Loadisdsng...</div>;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setUser(props);
     setStatus(true);
     const bet = {
       betAmount,
@@ -112,23 +137,31 @@ const CryptoBetter = (props) => {
       higherOrLower,
       user,
     };
+
     const { data } = await mutation.mutateAsync(bet);
     let betsArray = [];
 
+    //betsArray[0]._id
+
     if (user.bets) {
-      betsArray = [...user.bets, data];
+      betsArray = [...user.bets, data.bet];
     } else {
-      betsArray = [data];
+      betsArray = [data.bet];
     }
 
     const updatedUser = {
+      ...user,
       bets: betsArray,
     };
 
     setUser(updatedUser);
+    setBalance(user.balance + payout);
+
+    // To call the mutation and update the user's balance:
+    updateUserBalance.mutate(balance);
+
+    console.log(balance);
     console.log(bet);
-    console.log("price: " + price);
-    console.log("lastprice: " + lastPrice);
   };
 
   return (
