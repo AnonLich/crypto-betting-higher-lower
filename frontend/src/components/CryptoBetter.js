@@ -33,7 +33,7 @@ const CryptoBetter = (props) => {
 
   const [balance, setBalance] = useState(0);
 
-  const [remainingTime, setRemainingTime] = useState(0);
+  const [time, setTime] = useState(10);
 
   const [user, setUser] = useState({
     name: "",
@@ -43,19 +43,24 @@ const CryptoBetter = (props) => {
   });
 
   const checkWin = (lastPrice, price) => {
+    let newPayout = 0;
     if (
       (lastPrice < price && higherOrLower === "higher") ||
       (lastPrice > price && higherOrLower === "lower")
     ) {
-      setPayout(betAmount * 2);
+      console.log("VINST");
+      newPayout = betAmount * 2;
       setStatus(false);
       setHigherOrLower("null");
-      return true;
+      setPayout(newPayout);
+      setWin(true);
     } else {
-      setPayout(betAmount * 2);
+      console.log("FÖRLUST");
+      newPayout = -betAmount * 2;
       setStatus(false);
       setHigherOrLower("null");
-      return false;
+      setPayout(newPayout);
+      setWin(false);
     }
   };
 
@@ -72,31 +77,43 @@ const CryptoBetter = (props) => {
 
   useEffect(() => {
     const updateGameState = () => {
-      setWin(checkWin(lastPrice, price));
+      checkWin(lastPrice, price);
       const newBalance = win ? user.balance + payout : user.balance - payout;
       setBalance(newBalance);
-      console.log(newBalance);
       updateUserBalance.mutate(newBalance); //DENNA MÅSTE ENDAST KÖRAS EFtER USER HAR LOGGAT IN
-
     };
     updatePrice();
 
     const interval = setInterval(() => {
       updatePrice();
-
       updateGameState();
     }, 10000);
 
     return () => clearInterval(interval);
   }, [user]);
 
+  function Timer() {
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setTime((prevTime) => prevTime - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }, []);
+
+    return <h4> Remaining time: {time} seconds</h4>;
+  }
+
+  useEffect(() => {
+    setTime(10);
+  }, [price]);
+
   function WinLose({ win }) {
     if (win) {
-      return <div>Win!</div>;
+      return <h4>Win!</h4>;
     } else if (!win) {
-      return <div>Lose!</div>;
+      return <h4>Lose!</h4>;
     } else {
-      return <div>No current bet.</div>;
+      return <h4>No current bet.</h4>;
     }
   }
 
@@ -122,7 +139,7 @@ const CryptoBetter = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (user.balance > betAmount) {
+    if (user.balance > betAmount && !status) {
       setStatus(true);
 
       const bet = {
@@ -149,9 +166,8 @@ const CryptoBetter = (props) => {
         bets: betsArray,
       };
 
-      setUser(updatedUser);
-
       console.log(balance);
+      setUser(updatedUser);
 
       console.log(bet);
     }
@@ -160,7 +176,7 @@ const CryptoBetter = (props) => {
   return (
     <div className="userstats">
       <h3>Balance: {balance}</h3>
-      <h3>Remaining time: {remainingTime}</h3>
+      <Timer />
       <div className="currentvalue">
         <h4>BTC Price: ${price}</h4>
         <p>Do you think it will go higher or lower?</p>
