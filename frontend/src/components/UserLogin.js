@@ -26,11 +26,10 @@ const UserLogin = (props) => {
     if (foundUser) {
       // check if foundUser is not null
       setBalance(foundUser.balance);
-      console.log("FOUND");
+      console.log("BALANCE: ");
       console.log(foundUser);
     }
   }, [foundUser, balance]);
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -79,9 +78,8 @@ const UserLogin = (props) => {
         </div>
       ) : (
         <div className="stats">
-          <div>
-            Hello {foundUser.name}, your current balance is: {balance}.
-          </div>
+          <div>Hello {foundUser.name}!
+          Good luck bro.</div>
         </div>
       )}
     </>
