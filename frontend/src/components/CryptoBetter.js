@@ -42,6 +42,16 @@ const CryptoBetter = (props) => {
     bets: [],
   });
 
+  const [bet, setBet] = useState({
+    betAmount: 0,
+    betType: "",
+    payout: 0,
+    win: false,
+    status: false,
+    higherOrLower: "",
+    user: user,
+  });
+
   const checkWin = (lastPrice, price) => {
     let newPayout = 0;
     if (
@@ -142,15 +152,8 @@ const CryptoBetter = (props) => {
     if (user.balance > betAmount && !status) {
       setStatus(true);
 
-      const bet = {
-        betAmount,
-        betType,
-        payout,
-        win,
-        status,
-        higherOrLower,
-        user,
-      };
+
+      
 
       const { data } = await mutation.mutateAsync(bet);
       let betsArray = []; //betsArray[0]._id
