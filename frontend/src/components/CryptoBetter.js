@@ -1,7 +1,8 @@
 import { setLogger, useQuery } from "react-query";
 import { useMutation } from "react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import axios from "axios";
+import { betReducer, INITIAL_STATE } from "./betReducer";
 
 const CryptoBetter = (props) => {
   //FETCH
@@ -42,15 +43,7 @@ const CryptoBetter = (props) => {
     bets: [],
   });
 
-  const [bet, setBet] = useState({
-    betAmount: 0,
-    betType: "",
-    payout: 0,
-    win: false,
-    status: false,
-    higherOrLower: "",
-    user: user,
-  });
+  const [bet, dispatch] = useReducer(betReducer, INITIALSTATE);
 
   const checkWin = (lastPrice, price) => {
     let newPayout = 0;
@@ -149,13 +142,15 @@ const CryptoBetter = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (user.balance > betAmount && !status) {
+    //if (user.balance > bet.betAmount && !bet.status) {
       setStatus(true);
-
-
-      
+      dispatch({
+        type: "SET_BET",
+        payload: { name: e.target.name, value: e.target.value },
+      });
 
       const { data } = await mutation.mutateAsync(bet);
+
       let betsArray = []; //betsArray[0]._id
 
       if (user.bets) {
@@ -173,8 +168,22 @@ const CryptoBetter = (props) => {
       setUser(updatedUser);
 
       console.log(bet);
-    }
   };
+
+  const handleButtonClick = async (e) => {
+    e.preventDefault()
+  
+    const newBetType = e.target.name === 'higherOrLower' ? 'BTCUSD' : 'ETHUSD';
+    dispatch({
+      type: "SET_BET",
+      payload: { name: 'betType', value: newBetType },
+    });
+  
+
+    
+    await handleSubmit(e);
+  };
+  
 
   return (
     <div className="userstats">
@@ -185,18 +194,30 @@ const CryptoBetter = (props) => {
         <p>Do you think it will go higher or lower?</p>
         <div className="bet">
           <h2>Bet</h2>
-          <form onSubmit={handleSubmit}>
+          <form>
             <label>Bet Amount:</label>
             <input
               type="number"
               required
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
+              value={bet.betAmount}
+              name="betAmount"
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_BET",
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
             />
             <label>Bet Type:</label>
             <select
-              value={betType}
-              onChange={(e) => setBetType(e.target.value)}
+              value={bet.betType}
+              name="betType"
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_BET",
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
             >
               <option value="BTCUSD">BTCUSD</option>
               <option value="ETHUSD">ETHUSD</option>
@@ -204,14 +225,16 @@ const CryptoBetter = (props) => {
             <button
               disabled={mutation.isLoading}
               value="higher"
-              onClick={(e) => setHigherOrLower(e.target.value)}
+              name="higherOrLower"
+              onClick={handleButtonClick}
             >
               Higher
             </button>
             <button
               disabled={mutation.isLoading}
               value="lower"
-              onClick={(e) => setHigherOrLower(e.target.value)}
+              name="higherOrLower"
+              onClick={handleButtonClick}
             >
               Lower
             </button>
